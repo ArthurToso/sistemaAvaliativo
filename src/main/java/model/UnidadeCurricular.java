@@ -6,8 +6,8 @@ import java.util.Set;
 import java.util.Objects;
 
 @Entity
-@Table(name = "cursos")
-public class Curso {
+@Table(name = "unidades_curriculares")
+public class UnidadeCurricular {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,14 +16,13 @@ public class Curso {
     @Column(name = "nome", nullable = false)
     private String nome;
 
-    @OneToMany(mappedBy = "curso")
+    @OneToMany(mappedBy = "unidadeCurricular")
     private Set<Turma> turmas = new HashSet<>();
 
-
-    public Curso() {
+    public UnidadeCurricular() {
     }
 
-    public Curso(String nome) {
+    public UnidadeCurricular(String nome) {
         this.nome = nome;
     }
 
@@ -55,8 +54,8 @@ public class Curso {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Curso curso = (Curso) o;
-        return Objects.equals(id, curso.id);
+        UnidadeCurricular that = (UnidadeCurricular) o;
+        return Objects.equals(id, that.id);
     }
 
     @Override
