@@ -8,21 +8,21 @@
 
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <class>com.suauniversidade.projetoavaliativo.model.Usuario</class>
-        <class>com.suauniversidade.projetoavaliativo.model.Perfil</class>
-        <class>com.suauniversidade.projetoavaliativo.model.Curso</class>
-        <class>com.suauniversidade.projetoavaliativo.model.UnidadeCurricular</class>
-        <class>com.suauniversidade.projetoavaliativo.model.Turma</class>
-        <class>com.suauniversidade.projetoavaliativo.model.ProcessoAvaliativo</class>
-        <class>com.suauniversidade.projetoavaliativo.model.Formulario</class>
-        <class>com.suauniversidade.projetoavaliativo.model.Questao</class>
-        <class>com.suauniversidade.projetoavaliativo.model.Alternativa</class>
-        <class>com.suauniversidade.projetoavaliativo.model.AvaliacaoRespondida</class>
-        <class>com.suauniversidade.projetoavaliativo.model.Resposta</class>
+        <class>model.Usuario</class>
+        <class>model.Perfil</class>
+        <class>model.Curso</class>
+        <class>model.UnidadeCurricular</class>
+        <class>model.Turma</class>
+        <class>model.ProcessoAvaliativo</class>
+        <class>model.Formulario</class>
+        <class>model.Questao</class>
+        <class>model.Alternativa</class>
+        <class>model.AvaliacaoRespondida</class>
+        <class>model.Resposta</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/sistema_avaliativo?useTimezone=true&amp;serverTimezone=UTC"/>
-            <property name="jakarta.persistence.jdbc.user" value="root"/> <property name="jakarta.persistence.jdbc.password" value="seu_password"/> <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="jakarta.persistence.jdbc.user" value="root"/> <property name="jakarta.persistence.jdbc.password" value="admin"/> <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
 
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
             <property name="hibernate.show_sql" value="true"/> <property name="hibernate.format_sql" value="true"/> <property name="hibernate.hbm2ddl.auto" value="update"/> </properties>
