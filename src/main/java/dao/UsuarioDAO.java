@@ -11,4 +11,5 @@ public interface UsuarioDAO{
     Usuario buscarPorId(Long id);
     List<Usuario> listarTodos();
     Usuario buscarPorLogin(String login);
+    List<Usuario> listarPorPerfil(String nomePerfil);
 }

@@ -104,4 +104,19 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             em.close();
         }
     }
+
+    @Override
+    public List<Usuario> listarPorPerfil(String nomePerfil) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            // JPQL para buscar usuários filtrando pelo nome do perfil
+            String jpql = "SELECT u FROM Usuario u WHERE u.perfil.nome = :nomePerfil";
+            TypedQuery<Usuario> query = em.createQuery(jpql, Usuario.class);
+            query.setParameter("nomePerfil", nomePerfil);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
 }
