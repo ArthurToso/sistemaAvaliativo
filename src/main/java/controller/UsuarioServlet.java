@@ -39,6 +39,8 @@ public class UsuarioServlet extends HttpServlet {
         // 1. Busca a lista de USUÁRIOS
         List<Usuario> listaUsuarios = usuarioDAO.listarTodos();
 
+
+
         // 2. Busca a lista de PERFIS (para o dropdown)
         List<Perfil> listaPerfis = perfilDAO.listarTodos();
 
