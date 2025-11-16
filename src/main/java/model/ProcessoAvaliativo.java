@@ -26,6 +26,14 @@ public class ProcessoAvaliativo {
     @OneToMany(mappedBy = "processoAvaliativo", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Formulario> formularios = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "processos_turmas", // A tabela de junção que acabamos de criar
+            joinColumns = @JoinColumn(name = "processo_id"),
+            inverseJoinColumns = @JoinColumn(name = "turma_id")
+    )
+    private Set<Turma> turmas = new HashSet<>();
+
     public ProcessoAvaliativo() {
     }
 
@@ -68,6 +76,10 @@ public class ProcessoAvaliativo {
     public void setFormularios(Set<Formulario> formularios) {
         this.formularios = formularios;
     }
+
+    public Set<Turma> getTurmas() {return turmas;}
+
+    public void setTurmas(Set<Turma> turmas) {this.turmas = turmas;}
 
     @Override
     public boolean equals(Object o) {

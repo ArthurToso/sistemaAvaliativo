@@ -43,6 +43,9 @@ public class Turma {
     )
     private Set<Usuario> professores = new HashSet<>();
 
+    @ManyToMany(mappedBy = "turmas")
+    private Set<ProcessoAvaliativo> processosAvaliativos = new HashSet<>();
+
     public Turma() {
     }
 
@@ -101,6 +104,10 @@ public class Turma {
     public void setProfessores(Set<Usuario> professores) {
         this.professores = professores;
     }
+
+    public Set<ProcessoAvaliativo> getProcessosAvaliativos() {return processosAvaliativos;}
+
+    public void setProcessosAvaliativos(Set<ProcessoAvaliativo> processosAvaliativos) {this.processosAvaliativos = processosAvaliativos;}
 
     @Override
     public boolean equals(Object o) {

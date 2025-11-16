@@ -9,8 +9,9 @@
         h1, h2 { color: #333; }
         form { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; max-width: 500px; }
         form div { margin-bottom: 10px; }
-        form label { display: inline-block; width: 100px; }
-        form input { padding: 5px; width: 250px; }
+        form label { display: block; font-weight: bold; margin-bottom: 5px; } /* Mudei label para block */
+        form input, form select { padding: 8px; width: 100%; box-sizing: border-box; } /* Mudei estilo */
+        form select[multiple] { height: 150px; } /* Mudei estilo */
         table { border-collapse: collapse; width: 100%; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
@@ -35,6 +36,18 @@
         <label for="dataFim">Data de Fim:</label>
         <input type="date" id="dataFim" name="dataFim" required>
     </div>
+
+    <div>
+        <label for="turmaIds">Turmas (Segure Ctrl/Cmd para selecionar várias):</label>
+        <select id="turmaIds" name="turmaIds" multiple required>
+            <c:forEach var="turma" items="${listaTurmas}">
+                <%-- Mostra o código da turma, nome do curso e nome da disciplina --%>
+                <option value="${turma.id}">
+                        ${turma.codigo} - ${turma.curso.nome} - ${turma.unidadeCurricular.nome}
+                </option>
+            </c:forEach>
+        </select>
+    </div>
     <button type="submit">Salvar</button>
 </form>
 
@@ -49,7 +62,7 @@
         <th>Título</th>
         <th>Data de Início</th>
         <th>Data de Fim</th>
-    </tr>
+        <th>Turmas Associadas</th> </tr>
     </thead>
     <tbody>
     <c:forEach var="processo" items="${listaProcessos}">
@@ -58,6 +71,11 @@
             <td>${processo.titulo}</td>
             <td>${processo.dataInicio}</td>
             <td>${processo.dataFim}</td>
+            <td>
+                <c:forEach var="turma" items="${processo.turmas}">
+                    ${turma.codigo} <br/>
+                </c:forEach>
+            </td>
         </tr>
     </c:forEach>
     </tbody>
