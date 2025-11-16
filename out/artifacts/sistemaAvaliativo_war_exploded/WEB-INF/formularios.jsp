@@ -71,6 +71,7 @@
         <th>Título</th>
         <th>Processo Avaliativo</th>
         <th>Tipo</th>
+        <th>Ações</th>
     </tr>
     </thead>
     <tbody>
@@ -80,6 +81,11 @@
             <td>${form.titulo}</td>
             <td>${form.processoAvaliativo.titulo}</td>
             <td>${form.tipo}</td>
+            <td>
+                <a href="questoes?formularioId=${form.id}">
+                    Gerenciar Questões
+                </a>
+            </td>
         </tr>
     </c:forEach>
     </tbody>
