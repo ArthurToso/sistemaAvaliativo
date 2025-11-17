@@ -15,5 +15,5 @@ public interface FormularioDAO {
 
     List<Formulario> listarTodos();
 
-    List<Formulario> listarFormulariosDisponiveis(Long alunoId);
+    List<Object[]> listarAvaliacoesPendentes(Long alunoId);
 }

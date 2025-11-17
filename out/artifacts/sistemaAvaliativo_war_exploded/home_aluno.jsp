@@ -27,27 +27,33 @@
     <tr>
         <th>Avaliação</th>
         <th>Período (Processo)</th>
+        <th>Turma</th>
         <th>Ação</th>
     </tr>
     </thead>
     <tbody>
     <%-- Implementação do RF12: Itera sobre a lista filtrada pelo DAO --%>
-    <c:forEach var="form" items="${listaFormularios}">
+    <<c:forEach var="item" items="${listaPendencias}">
+        <%--
+           item[0] é o objeto Formulario
+           item[1] é o objeto Turma
+        --%>
         <tr>
-            <td>${form.titulo}</td>
-            <td>${form.processoAvaliativo.titulo}</td>
+            <td>${item[0].titulo}</td>
+            <td>${item[0].processoAvaliativo.titulo}</td>
+            <td>${item[1].codigo}</td> <%-- 3. EXIBA A TURMA --%>
             <td>
-                    <%-- Este link ainda não funciona, mas é o próximo passo --%>
-                <a href="responder?formularioId=${form.id}">
+                    <%-- 4. CONSTRUA O LINK CORRETO com &turmaId=... --%>
+                <a href="responder?formularioId=${item[0].id}&turmaId=${item[1].id}">
                     Responder
                 </a>
             </td>
         </tr>
     </c:forEach>
 
-    <c:if test="${empty listaFormularios}">
+    <c:if test="${empty listaPendencias}">
         <tr>
-            <td colspan="3" class="no-forms">
+            <td colspan="4" class="no-forms">
                 Nenhuma avaliação disponível para você no momento.
             </td>
         </tr>

@@ -44,12 +44,11 @@ public class HomeServlet extends HttpServlet {
         // Roteador: Decide para qual página enviar com base no perfil
         if ("ALUNO".equals(perfil)) {
 
-            // --- LÓGICA DO RF12 ---
-            // 1. Busca os formulários disponíveis para este aluno
-            List<Formulario> formulariosDisponiveis = formularioDAO.listarFormulariosDisponiveis(usuarioLogado.getId());
+            // 1. Busca os pares [Formulario, Turma]
+            List<Object[]> pendencias = formularioDAO.listarAvaliacoesPendentes(usuarioLogado.getId());
 
-            // 2. Envia a lista para o JSP
-            request.setAttribute("listaFormularios", formulariosDisponiveis);
+            // 2. Envia a nova lista para o JSP
+            request.setAttribute("listaPendencias", pendencias);
 
             // 3. Encaminha para o dashboard do aluno
             RequestDispatcher dispatcher = request.getRequestDispatcher("/home_aluno.jsp");

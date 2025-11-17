@@ -8,6 +8,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProcessoAvaliativoDAOImpl implements ProcessoAvaliativoDAO {
 
@@ -82,9 +83,9 @@ public class ProcessoAvaliativoDAOImpl implements ProcessoAvaliativoDAO {
     public List<ProcessoAvaliativo> listarTodos() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            String jpql = "SELECT pa FROM ProcessoAvaliativo pa";
+            String jpql = "SELECT pa FROM ProcessoAvaliativo pa LEFT JOIN FETCH pa.turmas";
             TypedQuery<ProcessoAvaliativo> query = em.createQuery(jpql, ProcessoAvaliativo.class);
-            return query.getResultList();
+            return query.getResultList().stream().distinct().collect(Collectors.toList());
         } finally {
             em.close();
         }

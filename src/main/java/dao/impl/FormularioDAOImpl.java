@@ -86,16 +86,20 @@ public class FormularioDAOImpl implements FormularioDAO {
     }
 
     @Override
-    public List<Formulario> listarFormulariosDisponiveis(Long alunoId) {
+    public List<Object[]> listarAvaliacoesPendentes(Long alunoId) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            String jpql = "SELECT DISTINCT f FROM Formulario f " +
+            /*
+             * Esta consulta agora retorna o Formulario (f) E a Turma (t)
+             * para a qual a avaliação está disponível.
+             */
+            String jpql = "SELECT DISTINCT f, t FROM Formulario f " +
                     "JOIN f.processoAvaliativo pa " +
                     "JOIN pa.turmas t " +
                     "JOIN t.alunos a " +
                     "WHERE a.id = :alunoId";
 
-            TypedQuery<Formulario> query = em.createQuery(jpql, Formulario.class);
+            TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
             query.setParameter("alunoId", alunoId);
             return query.getResultList();
         } finally {
