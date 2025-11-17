@@ -27,9 +27,8 @@ public class AutenticacaoFilter implements Filter {
         // Adiciona as URLs públicas que qualquer um pode acessar
         urlsPermitidas.add("/login");
         urlsPermitidas.add("/logout");
-        // Se você tiver pastas CSS ou JS, adicione-as aqui também:
-        // urlsPermitidas.add("/css/");
-        // urlsPermitidas.add("/js/");
+        urlsPermitidas.add("/"); // Permite acesso à raiz (index.jsp)
+        urlsPermitidas.add("/index.jsp");
     }
 
     @Override

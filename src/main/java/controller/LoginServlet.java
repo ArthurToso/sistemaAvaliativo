@@ -52,8 +52,7 @@ public class LoginServlet extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("usuarioLogado", usuario);
 
-            // Redireciona para a página inicial ou dashboard (por enquanto, vamos para 'cursos')
-            response.sendRedirect(request.getContextPath() + "/cursos");
+            response.sendRedirect(request.getContextPath() + "/home");
 
         } else {
 
