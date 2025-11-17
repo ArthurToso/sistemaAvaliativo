@@ -14,4 +14,6 @@ public interface FormularioDAO {
     Formulario buscarPorId(Long id);
 
     List<Formulario> listarTodos();
+
+    List<Formulario> listarFormulariosDisponiveis(Long alunoId);
 }
