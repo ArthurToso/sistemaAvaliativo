@@ -36,51 +36,48 @@
         <input type="hidden" name="turmaId" value="${turmaId}">
 
         <%-- Loop principal: itera sobre cada Questão do Formulário --%>
-        <c:forEach var="questao" items="${formulario.questoes}" varStatus="loop">
+            <c:forEach var="questao" items="${formulario.questoes}" varStatus="loop">
 
-            <div class="questao-block">
-                <div class="questao-enunciado">
-                        ${loop.count}. <c:out value="${questao.enunciado}"/>
-                    <c:if test="${questao.obrigatoria}">
-                        <span class="questao-obrigatoria">* (Obrigatória)</span>
+                <div class="questao-block">
+                    <div class="questao-enunciado">
+                            ${loop.count}. <c:out value="${questao.enunciado}"/>
+                        <c:if test="${questao.obrigatoria}">
+                            <span class="questao-obrigatoria">* (Obrigatória)</span>
+                        </c:if>
+                    </div>
+
+                        <%-- Define o 'name' do input para ser "q_ID_DA_QUESTAO" --%>
+                    <c:set var="inputName" value="q_${questao.id}"/>
+                    <c:set var="required" value="${questao.obrigatoria ? 'required' : ''}"/>
+
+
+                        <%-- --- LÓGICA DE EXIBIÇÃO CORRIGIDA --- --%>
+
+                        <%-- RF09: Se for Questão de TEXTO (Compara o Enum.name() com a String) --%>
+                    <c:if test="${questao.tipo.name() == 'TEXTO'}">
+                        <textarea name="${inputName}" ${required}></textarea>
                     </c:if>
-                </div>
 
-                    <%-- Define o 'name' do input para ser "q_ID_DA_QUESTAO" --%>
-                <c:set var="inputName" value="q_${questao.id}"/>
-                <c:set var="required" value="${questao.obrigatoria ? 'required' : ''}"/>
+                        <%-- RF08: Se for Questão de RESPOSTA ÚNICA --%>
+                    <c:if test="${questao.tipo.name() == 'UNICA_ESCOLHA'}">
+                        <c:forEach var="alt" items="${questao.alternativas}">
+                            <label class="alternativa-label">
+                                <input type="radio" name="${inputName}" value="${alt.id}" ${required}>
+                                <c:out value="${alt.texto}"/>
+                            </label>
+                        </c:forEach>
+                    </c:if>
 
-
-                    <%-- RF09: Se for Questão de TEXTO --%>
-                <c:if test="${questao.tipo == 'TEXTO'}">
-                    <textarea name="${inputName}" ${required}></textarea>
-                </c:if>
-
-                    <%-- RF08: Se for Questão de RESPOSTA ÚNICA --%>
-                <c:if test="${questao.tipo == 'UNICA_ESCOLHA'}">
-                    <c:forEach var="alt" items="${questao.alternativas}">
-                        <label class="alternativa-label">
-                            <input type="radio" name="${inputName}" value="${alt.id}" ${required}>
-                            <c:out value="${alt.texto}"/>
-                        </label>
-                    </c:forEach>
-                </c:if>
-
-                    <%-- RF08: Se for Questão de MÚLTIPLA RESPOSTA (Não implementado no Servlet POST,
-                         pois requer tratamento de array. Vamos simplificar para UNICA_ESCOLHA por enquanto)
-
-                         Abaixo está como seria o HTML para MÚLTIPLA ESCOLHA (checkbox)
-                         O Servlet precisaria de lógica extra (getParameterValues)
-                    --%>
-                <c:if test="${questao.tipo == 'MULTIPLA_ESCOLHA'}">
-                    <c:forEach var="alt" items="${questao.alternativas}">
-                        <label class="alternativa-label">
-                                <%-- Note que o 'name' é diferente. O Servlet POST atual não lida com isso. --%>
-                            <input type-="checkbox" name="q_multi_${questao.id}" value="${alt.id}">
-                            <c:out value="${alt.texto}"/>
-                        </label>
-                    </c:forEach>
-                </c:if>
+                        <%-- RF08: Se for Questão de MÚLTIPLA RESPOSTA --%>
+                    <c:if test="${questao.tipo.name() == 'MULTIPLA_ESCOLHA'}">
+                        <c:forEach var="alt" items="${questao.alternativas}">
+                            <label class="alternativa-label">
+                                    <%-- Corrigido para "checkbox" e usa o mesmo 'inputName' --%>
+                                <input type="checkbox" name="${inputName}" value="${alt.id}">
+                                <c:out value="${alt.texto}"/>
+                            </label>
+                        </c:forEach>
+                    </c:if>
 
             </div>
         </c:forEach>

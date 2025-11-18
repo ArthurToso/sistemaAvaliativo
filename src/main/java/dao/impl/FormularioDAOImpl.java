@@ -1,7 +1,10 @@
 package dao.impl;
 
 import dao.FormularioDAO;
+import jakarta.persistence.NoResultException;
 import model.Formulario;
+import model.Questao;
+import org.hibernate.Hibernate;
 import util.JPAUtil;
 
 import jakarta.persistence.EntityManager;
@@ -97,7 +100,14 @@ public class FormularioDAOImpl implements FormularioDAO {
                     "JOIN f.processoAvaliativo pa " +
                     "JOIN pa.turmas t " +
                     "JOIN t.alunos a " +
-                    "WHERE a.id = :alunoId";
+                    "WHERE a.id = :alunoId " +
+                    // E ONDE NÃO EXISTIR...
+                    "AND NOT EXISTS (" +
+                    "  SELECT ar FROM AvaliacaoRespondida ar " +
+                    "  WHERE ar.aluno.id = :alunoId " +       // ...uma resposta para este aluno
+                    "  AND ar.formulario.id = f.id " +     // ...para este formulário
+                    "  AND ar.turma.id = t.id" +             // ...e para esta turma
+                    ")";
 
             TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
             query.setParameter("alunoId", alunoId);
@@ -107,4 +117,32 @@ public class FormularioDAOImpl implements FormularioDAO {
         }
     }
 
+    @Override
+    public Formulario buscarPorIdComQuestoesEAlternativas(Long id) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            // 1. Busca o formulário e suas questões (1º nível)
+            String jpql = "SELECT f FROM Formulario f " +
+                    "LEFT JOIN FETCH f.questoes " +
+                    "WHERE f.id = :id";
+            TypedQuery<Formulario> query = em.createQuery(jpql, Formulario.class);
+            query.setParameter("id", id);
+
+            Formulario formulario = query.getSingleResult();
+
+            // 2. Agora, força o carregamento das alternativas (2º nível)
+            //    A sessão (em) AINDA ESTÁ ABERTA aqui.
+            if (formulario != null) {
+                for (Questao q : formulario.getQuestoes()) {
+                    Hibernate.initialize(q.getAlternativas());
+                }
+            }
+            return formulario;
+
+        } catch (NoResultException e) {
+            return null; // Formulário não encontrado
+        } finally {
+            em.close(); // Agora sim podemos fechar
+        }
+    }
 }

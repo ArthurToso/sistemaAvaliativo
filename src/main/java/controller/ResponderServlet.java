@@ -46,15 +46,7 @@ public class ResponderServlet extends HttpServlet {
         Long formularioId = Long.parseLong(request.getParameter("formularioId"));
         Long turmaId = Long.parseLong(request.getParameter("turmaId"));
 
-        // Busca o formulário completo, com suas questões e alternativas
-        Formulario formulario = formularioDAO.buscarPorId(formularioId);
-
-        // Precisamos forçar o carregamento das questões e alternativas
-        // ANTES de enviar para o JSP, para evitar LazyInitializationException.
-        // (O DAO de Questao/Alternativa já poderia fazer isso, mas faremos aqui)
-        for (Questao q : formulario.getQuestoes()) {
-            q.getAlternativas().size(); // Força o carregamento
-        }
+        Formulario formulario = formularioDAO.buscarPorIdComQuestoesEAlternativas(formularioId);
 
         request.setAttribute("formulario", formulario);
         request.setAttribute("turmaId", turmaId); // Envia o ID da turma
@@ -73,68 +65,83 @@ public class ResponderServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         Usuario alunoLogado = (Usuario) session.getAttribute("usuarioLogado");
 
-        // 1. Pegar os IDs de contexto do formulário
         Long formularioId = Long.parseLong(request.getParameter("formularioId"));
         Long turmaId = Long.parseLong(request.getParameter("turmaId"));
 
-        // 2. Buscar os objetos "pai" do banco
-        Formulario formulario = formularioDAO.buscarPorId(formularioId);
+        Formulario formulario = formularioDAO.buscarPorIdComQuestoesEAlternativas(formularioId);
         Turma turma = turmaDAO.buscarPorId(turmaId);
 
-        // 3. Criar a "Capa" da avaliação (RF13)
         AvaliacaoRespondida avaliacao = new AvaliacaoRespondida();
         avaliacao.setAluno(alunoLogado);
         avaliacao.setFormulario(formulario);
         avaliacao.setTurma(turma);
         avaliacao.setDataResposta(LocalDateTime.now());
 
-        // 4. Criar o conjunto de Respostas
         Set<Resposta> respostas = new HashSet<>();
 
-        // 5. Iterar sobre todas as questões do formulário
+        // Itera sobre todas as questões do formulário
         for (Questao questao : formulario.getQuestoes()) {
+
             // O nome do campo no JSP será "q_{id_da_questao}"
             String nomeParametro = "q_" + questao.getId();
 
-            // Pega o valor enviado
-            String valorResposta = request.getParameter(nomeParametro);
+            // Pega os valores (pode ser um array para checkboxes)
+            String[] valoresResposta = request.getParameterValues(nomeParametro);
 
-            if (valorResposta != null && !valorResposta.isEmpty()) {
+            if (valoresResposta == null || valoresResposta.length == 0 || valoresResposta[0].isEmpty()) {
+                // Pula esta questão se for opcional e não foi respondida
+                // (Adicionar lógica de obrigatoriedade aqui depois)
+                continue;
+            }
+
+            // --- LÓGICA DE SALVAMENTO CORRIGIDA ---
+
+            if (questao.getTipo() == TipoQuestao.TEXTO) {
+                // Se for aberta, salva o texto (só vem um valor)
                 Resposta r = new Resposta();
                 r.setQuestao(questao);
-                r.setAvaliacaoRespondida(avaliacao); // Linka à "capa"
-
-                if (questao.getTipo() == TipoQuestao.TEXTO) {
-                    // Se for aberta, salva o texto
-                    r.setTextoResposta(valorResposta);
-                } else {
-                    // Se for de múltipla escolha, busca a alternativa e a salva
-                    Alternativa altSelecionada = alternativaDAO.buscarPorId(Long.parseLong(valorResposta));
-                    r.setAlternativaSelecionada(altSelecionada);
-                }
+                r.setAvaliacaoRespondida(avaliacao);
+                r.setTextoResposta(valoresResposta[0]);
                 respostas.add(r);
+
+            } else if (questao.getTipo() == TipoQuestao.UNICA_ESCOLHA) {
+                // Se for radio, salva a alternativa (só vem um valor)
+                Resposta r = new Resposta();
+                r.setQuestao(questao);
+                r.setAvaliacaoRespondida(avaliacao);
+                Alternativa alt = alternativaDAO.buscarPorId(Long.parseLong(valoresResposta[0]));
+                r.setAlternativaSelecionada(alt);
+                respostas.add(r);
+
+            } else if (questao.getTipo() == TipoQuestao.MULTIPLA_ESCOLHA) {
+                // Se for checkbox, itera sobre TODOS os valores e cria uma Resposta para CADA
+                for (String valorId : valoresResposta) {
+                    Resposta r = new Resposta();
+                    r.setQuestao(questao);
+                    r.setAvaliacaoRespondida(avaliacao);
+                    Alternativa alt = alternativaDAO.buscarPorId(Long.parseLong(valorId));
+                    r.setAlternativaSelecionada(alt);
+                    respostas.add(r);
+                }
             }
-            // (Lógica de RF10 - obrigatoriedade - pode ser adicionada aqui)
         }
 
-        // Adiciona o conjunto de respostas preenchido à "capa"
         avaliacao.setRespostas(respostas);
 
-        // 6. Salvar tudo no banco de uma vez
         try {
             avaliacaoRespondidaDAO.salvar(avaliacao);
-
-            // 7. Redirecionar para o home com mensagem de sucesso
-            // (Vamos implementar a mensagem de sucesso depois)
             response.sendRedirect(request.getContextPath() + "/home");
-
         } catch (Exception e) {
-            // Isso vai falhar se a UNIQUE KEY (RF13) for violada
-            // (Aluno tentando responder de novo)
             e.printStackTrace();
-            request.setAttribute("erro", "Você já respondeu este formulário.");
-            // Recarrega a página de formulários do aluno
-            doGet(request, response);
+            // Lógica de erro (aluno já respondeu)
+            request.setAttribute("erro", "Erro ao salvar: Você já respondeu este formulário.");
+
+            // Recarrega os dados necessários para a página de "responder"
+            Formulario formularioParaRecarregar = formularioDAO.buscarPorIdComQuestoesEAlternativas(formularioId);
+            request.setAttribute("formulario", formularioParaRecarregar);
+            request.setAttribute("turmaId", turmaId);
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/responder.jsp");
+            dispatcher.forward(request, response);
         }
     }
 }
