@@ -17,44 +17,72 @@
 <body>
 
 <h1>Minhas Avaliações</h1>
-
 <h3>Bem-vindo(a), ${sessionScope.usuarioLogado.nome}</h3>
 
-<p>Abaixo estão as avaliações disponíveis para você responder:</p>
+<hr>
+<h2>Avaliações Pendentes</h2>
 
 <table>
     <thead>
     <tr>
         <th>Avaliação</th>
-        <th>Período (Processo)</th>
+        <th>Processo</th>
         <th>Turma</th>
         <th>Ação</th>
     </tr>
     </thead>
     <tbody>
-    <%-- Implementação do RF12: Itera sobre a lista filtrada pelo DAO --%>
-    <<c:forEach var="item" items="${listaPendencias}">
-        <%--
-           item[0] é o objeto Formulario
-           item[1] é o objeto Turma
-        --%>
+    <c:forEach var="item" items="${listaPendencias}">
         <tr>
             <td>${item[0].titulo}</td>
             <td>${item[0].processoAvaliativo.titulo}</td>
-            <td>${item[1].codigo}</td> <%-- 3. EXIBA A TURMA --%>
+            <td>${item[1].codigo}</td>
             <td>
-                    <%-- 4. CONSTRUA O LINK CORRETO com &turmaId=... --%>
                 <a href="responder?formularioId=${item[0].id}&turmaId=${item[1].id}">
                     Responder
                 </a>
             </td>
         </tr>
     </c:forEach>
-
     <c:if test="${empty listaPendencias}">
         <tr>
             <td colspan="4" class="no-forms">
-                Nenhuma avaliação disponível para você no momento.
+                Nenhuma avaliação pendente.
+            </td>
+        </tr>
+    </c:if>
+    </tbody>
+</table>
+
+<hr>
+<h2>Avaliações Respondidas</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>Avaliação</th>
+        <th>Processo</th>
+        <th>Turma</th>
+        <th>Ação</th>
+    </tr>
+    </thead>
+    <tbody>
+    <c:forEach var="resp" items="${listaRespondidas}">
+        <tr>
+            <td>${resp.formulario.titulo}</td>
+            <td>${resp.formulario.processoAvaliativo.titulo}</td>
+            <td>${resp.turma.codigo}</td>
+            <td>
+                <a href="responder?formularioId=${resp.formulario.id}&turmaId=${resp.turma.id}">
+                    Editar Respostas
+                </a>
+            </td>
+        </tr>
+    </c:forEach>
+    <c:if test="${empty listaRespondidas}">
+        <tr>
+            <td colspan="4" class="no-forms">
+                Nenhuma avaliação respondida editável.
             </td>
         </tr>
     </c:if>

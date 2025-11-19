@@ -14,16 +14,17 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap; // Importar
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.Map; // Importar
+import java.util.Optional; // Importar
+import java.util.Set; // Importar
 
 @WebServlet("/responder")
 public class ResponderServlet extends HttpServlet {
 
     private FormularioDAO formularioDAO;
     private TurmaDAO turmaDAO;
-    private QuestaoDAO questaoDAO;
     private AlternativaDAO alternativaDAO;
     private AvaliacaoRespondidaDAO avaliacaoRespondidaDAO;
 
@@ -31,13 +32,13 @@ public class ResponderServlet extends HttpServlet {
     public void init() {
         this.formularioDAO = new FormularioDAOImpl();
         this.turmaDAO = new TurmaDAOImpl();
-        this.questaoDAO = new QuestaoDAOImpl();
         this.alternativaDAO = new AlternativaDAOImpl();
         this.avaliacaoRespondidaDAO = new AvaliacaoRespondidaDAOImpl();
+        // Não precisamos do QuestaoDAO aqui, pois as questões vêm com o formulário
     }
 
     /**
-     * GET: Exibe o formulário para o aluno responder.
+     * GET: Exibe o formulário, pré-preenchendo se for edição.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -45,18 +46,60 @@ public class ResponderServlet extends HttpServlet {
 
         Long formularioId = Long.parseLong(request.getParameter("formularioId"));
         Long turmaId = Long.parseLong(request.getParameter("turmaId"));
+        Usuario alunoLogado = (Usuario) request.getSession().getAttribute("usuarioLogado");
 
+        // 1. Busca o formulário completo (com questões e alternativas)
         Formulario formulario = formularioDAO.buscarPorIdComQuestoesEAlternativas(formularioId);
 
+        // 2. Verifica se o aluno já respondeu (RF13 - Lógica de Edição)
+        Optional<AvaliacaoRespondida> opAvaliacao = avaliacaoRespondidaDAO
+                .buscarPorAlunoEFormulario(alunoLogado.getId(), formularioId, turmaId);
+
+        if (opAvaliacao.isPresent()) {
+            // --- MODO DE EDIÇÃO ---
+            AvaliacaoRespondida avaliacao = opAvaliacao.get();
+
+            // Se for anônimo, não pode editar (RF13)
+            if (avaliacao.getFormulario().getTipo() == TipoFormulario.ANONIMO) {
+                // Redireciona de volta com erro
+                response.sendRedirect(request.getContextPath() + "/home?erro=anonimo");
+                return;
+            }
+
+            // Cria mapas para o JSP pré-preencher
+            Map<Long, String> respostasTexto = new HashMap<>();
+            Map<Long, Long> respostasUnica = new HashMap<>();
+            Map<Long, Set<Long>> respostasMulti = new HashMap<>();
+
+            for (Resposta r : avaliacao.getRespostas()) {
+                Long questaoId = r.getQuestao().getId();
+                if (r.getQuestao().getTipo() == TipoQuestao.TEXTO) {
+                    respostasTexto.put(questaoId, r.getTextoResposta());
+                } else if (r.getQuestao().getTipo() == TipoQuestao.UNICA_ESCOLHA) {
+                    respostasUnica.put(questaoId, r.getAlternativaSelecionada().getId());
+                } else if (r.getQuestao().getTipo() == TipoQuestao.MULTIPLA_ESCOLHA) {
+                    respostasMulti.computeIfAbsent(questaoId, k -> new HashSet<>())
+                            .add(r.getAlternativaSelecionada().getId());
+                }
+            }
+
+            request.setAttribute("respostasTexto", respostasTexto);
+            request.setAttribute("respostasUnica", respostasUnica);
+            request.setAttribute("respostasMulti", respostasMulti);
+            // Envia o ID da avaliação existente para o POST saber que é um UPDATE
+            request.setAttribute("avaliacaoId", avaliacao.getId());
+        }
+        // else: Modo de Criação (os mapas estarão vazios, o JSP vai lidar com isso)
+
         request.setAttribute("formulario", formulario);
-        request.setAttribute("turmaId", turmaId); // Envia o ID da turma
+        request.setAttribute("turmaId", turmaId);
 
         RequestDispatcher dispatcher = request.getRequestDispatcher("/responder.jsp");
         dispatcher.forward(request, response);
     }
 
     /**
-     * POST: Salva as respostas do aluno no banco de dados.
+     * POST: Salva (Cria ou Atualiza) as respostas.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -65,83 +108,76 @@ public class ResponderServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         Usuario alunoLogado = (Usuario) session.getAttribute("usuarioLogado");
 
+        // Pegar dados do formulário
         Long formularioId = Long.parseLong(request.getParameter("formularioId"));
         Long turmaId = Long.parseLong(request.getParameter("turmaId"));
+        String avaliacaoIdStr = request.getParameter("avaliacaoId"); // Vem se for edição
 
         Formulario formulario = formularioDAO.buscarPorIdComQuestoesEAlternativas(formularioId);
-        Turma turma = turmaDAO.buscarPorId(turmaId);
 
-        AvaliacaoRespondida avaliacao = new AvaliacaoRespondida();
-        avaliacao.setAluno(alunoLogado);
-        avaliacao.setFormulario(formulario);
-        avaliacao.setTurma(turma);
+        AvaliacaoRespondida avaliacao;
+
+        // --- LÓGICA DE UPDATE (RF13) ---
+        if (avaliacaoIdStr != null && !avaliacaoIdStr.isEmpty()) {
+            // MODO DE ATUALIZAÇÃO
+            // Busca a avaliação existente (com suas respostas)
+            Long avaliacaoId = Long.parseLong(avaliacaoIdStr);
+            avaliacao = avaliacaoRespondidaDAO.buscarPorIdComRespostas(avaliacaoId).get();
+
+            // Limpa as respostas antigas. O Cascade.ALL vai deletá-las
+            avaliacao.getRespostas().clear();
+        } else {
+            // MODO DE CRIAÇÃO
+            avaliacao = new AvaliacaoRespondida();
+            avaliacao.setAluno(alunoLogado);
+            avaliacao.setFormulario(formulario);
+            Turma turma = turmaDAO.buscarPorId(turmaId);
+            avaliacao.setTurma(turma);
+        }
+
+        // Atualiza a data da resposta
         avaliacao.setDataResposta(LocalDateTime.now());
 
-        Set<Resposta> respostas = new HashSet<>();
+        Set<Resposta> novasRespostas = new HashSet<>();
 
-        // Itera sobre todas as questões do formulário
+        // Loop de salvamento (igual ao que fizemos antes)
         for (Questao questao : formulario.getQuestoes()) {
-
-            // O nome do campo no JSP será "q_{id_da_questao}"
             String nomeParametro = "q_" + questao.getId();
-
-            // Pega os valores (pode ser um array para checkboxes)
             String[] valoresResposta = request.getParameterValues(nomeParametro);
 
             if (valoresResposta == null || valoresResposta.length == 0 || valoresResposta[0].isEmpty()) {
-                // Pula esta questão se for opcional e não foi respondida
-                // (Adicionar lógica de obrigatoriedade aqui depois)
-                continue;
+                continue; // Pula não respondidas
             }
 
-            // --- LÓGICA DE SALVAMENTO CORRIGIDA ---
-
             if (questao.getTipo() == TipoQuestao.TEXTO) {
-                // Se for aberta, salva o texto (só vem um valor)
                 Resposta r = new Resposta();
                 r.setQuestao(questao);
                 r.setAvaliacaoRespondida(avaliacao);
                 r.setTextoResposta(valoresResposta[0]);
-                respostas.add(r);
-
-            } else if (questao.getTipo() == TipoQuestao.UNICA_ESCOLHA) {
-                // Se for radio, salva a alternativa (só vem um valor)
-                Resposta r = new Resposta();
-                r.setQuestao(questao);
-                r.setAvaliacaoRespondida(avaliacao);
-                Alternativa alt = alternativaDAO.buscarPorId(Long.parseLong(valoresResposta[0]));
-                r.setAlternativaSelecionada(alt);
-                respostas.add(r);
-
-            } else if (questao.getTipo() == TipoQuestao.MULTIPLA_ESCOLHA) {
-                // Se for checkbox, itera sobre TODOS os valores e cria uma Resposta para CADA
+                novasRespostas.add(r);
+            } else { // UNICA_ESCOLHA ou MULTIPLA_ESCOLHA
                 for (String valorId : valoresResposta) {
                     Resposta r = new Resposta();
                     r.setQuestao(questao);
                     r.setAvaliacaoRespondida(avaliacao);
                     Alternativa alt = alternativaDAO.buscarPorId(Long.parseLong(valorId));
                     r.setAlternativaSelecionada(alt);
-                    respostas.add(r);
+                    novasRespostas.add(r);
                 }
             }
         }
 
-        avaliacao.setRespostas(respostas);
+        // Seta o novo conjunto de respostas na "capa"
+        avaliacao.setRespostas(novasRespostas);
 
+        // Salva (o 'merge' do DAO cuida de criar ou atualizar)
         try {
             avaliacaoRespondidaDAO.salvar(avaliacao);
             response.sendRedirect(request.getContextPath() + "/home");
         } catch (Exception e) {
+            // Erro (ex: violação de constraint, etc.)
             e.printStackTrace();
-            // Lógica de erro (aluno já respondeu)
-            request.setAttribute("erro", "Erro ao salvar: Você já respondeu este formulário.");
-
-            // Recarrega os dados necessários para a página de "responder"
-            Formulario formularioParaRecarregar = formularioDAO.buscarPorIdComQuestoesEAlternativas(formularioId);
-            request.setAttribute("formulario", formularioParaRecarregar);
-            request.setAttribute("turmaId", turmaId);
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/responder.jsp");
-            dispatcher.forward(request, response);
+            response.sendRedirect(request.getContextPath() + "/home?erro=salvar");
         }
     }
 }

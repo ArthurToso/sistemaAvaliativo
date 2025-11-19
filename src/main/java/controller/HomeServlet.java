@@ -1,7 +1,10 @@
 package controller;
 
+import dao.AvaliacaoRespondidaDAO;
 import dao.FormularioDAO;
+import dao.impl.AvaliacaoRespondidaDAOImpl;
 import dao.impl.FormularioDAOImpl;
+import model.AvaliacaoRespondida;
 import model.Formulario;
 import model.Usuario;
 
@@ -20,10 +23,12 @@ import java.util.List;
 public class HomeServlet extends HttpServlet {
 
     private FormularioDAO formularioDAO;
+    private AvaliacaoRespondidaDAO avaliacaoRespondidaDAO;
 
     @Override
     public void init() {
         this.formularioDAO = new FormularioDAOImpl();
+        this.avaliacaoRespondidaDAO = new AvaliacaoRespondidaDAOImpl();
     }
 
     @Override
@@ -44,13 +49,16 @@ public class HomeServlet extends HttpServlet {
         // Roteador: Decide para qual página enviar com base no perfil
         if ("ALUNO".equals(perfil)) {
 
-            // 1. Busca os pares [Formulario, Turma]
+            // 1. Busca os pares [Formulario, Turma] PENDENTES
             List<Object[]> pendencias = formularioDAO.listarAvaliacoesPendentes(usuarioLogado.getId());
 
-            // 2. Envia a nova lista para o JSP
-            request.setAttribute("listaPendencias", pendencias);
+            // 2. Busca as avaliações JÁ RESPONDIDAS e editáveis (RF13)
+            List<AvaliacaoRespondida> respondidas = avaliacaoRespondidaDAO.listarRespondidasEditaveis(usuarioLogado.getId());
 
-            // 3. Encaminha para o dashboard do aluno
+            // 3. Envia AMBAS as listas para o JSP
+            request.setAttribute("listaPendencias", pendencias);
+            request.setAttribute("listaRespondidas", respondidas); // Nova lista
+
             RequestDispatcher dispatcher = request.getRequestDispatcher("/home_aluno.jsp");
             dispatcher.forward(request, response);
 

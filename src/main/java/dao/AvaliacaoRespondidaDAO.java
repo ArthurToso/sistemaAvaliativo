@@ -1,6 +1,8 @@
 package dao;
 
 import model.AvaliacaoRespondida;
+
+import java.util.List;
 import java.util.Optional;
 
 public interface AvaliacaoRespondidaDAO {
@@ -20,4 +22,20 @@ public interface AvaliacaoRespondidaDAO {
      * @return Um Optional contendo a AvaliacaoRespondida se existir, ou vazio se não.
      */
     Optional<AvaliacaoRespondida> buscarPorAlunoEFormulario(Long alunoId, Long formularioId, Long turmaId);
+
+    /**
+     * Lista as avaliações já respondidas por um aluno que são editáveis (não-anônimas).
+     * @param alunoId O ID do aluno.
+     * @return Lista de avaliações respondidas e editáveis.
+     */
+    List<AvaliacaoRespondida> listarRespondidasEditaveis(Long alunoId);
+
+    /**
+     * Busca uma AvaliacaoRespondida pelo ID, e já carrega (FETCH)
+     * a sua lista de Respostas.
+     * @param avaliacaoId O ID da AvaliacaoRespondida.
+     * @return Um Optional contendo a avaliação com as respostas.
+     */
+    Optional<AvaliacaoRespondida> buscarPorIdComRespostas(Long avaliacaoId);
+
 }

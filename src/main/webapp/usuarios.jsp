@@ -72,7 +72,8 @@
             <td>${usuario.nome}</td>
             <td>${usuario.email}</td>
             <td>${usuario.login}</td>
-            <td>${usuario.perfil.nome}</td> <%-- Acessa o nome do perfil --%>
+            <td>${usuario.perfil.nome}</td>
+
         </tr>
     </c:forEach>
     </tbody>
