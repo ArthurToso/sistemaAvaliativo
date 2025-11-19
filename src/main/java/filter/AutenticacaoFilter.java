@@ -27,7 +27,6 @@ public class AutenticacaoFilter implements Filter {
         // Adiciona as URLs públicas que qualquer um pode acessar
         urlsPermitidas.add("/login");
         urlsPermitidas.add("/logout");
-        urlsPermitidas.add("/"); // Permite acesso à raiz (index.jsp)
         urlsPermitidas.add("/index.jsp");
     }
 
@@ -44,13 +43,16 @@ public class AutenticacaoFilter implements Filter {
 
         // 1. Verifica se a URL é pública (está na lista de permitidas)
         boolean urlPermitida = false;
-        for (String url : urlsPermitidas) {
-            if (caminho.startsWith(url)) {
-                urlPermitida = true;
-                break;
+        if (caminho.equals("/")) {
+            urlPermitida = true;
+        } else {
+            for (String url : urlsPermitidas) {
+                if (caminho.startsWith(url)) {
+                    urlPermitida = true;
+                    break;
+                }
             }
         }
-
         // 2. Verifica se o usuário está logado
         boolean logado = (session != null && session.getAttribute("usuarioLogado") != null);
 

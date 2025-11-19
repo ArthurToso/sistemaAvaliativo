@@ -145,6 +145,15 @@ public class ResponderServlet extends HttpServlet {
             String nomeParametro = "q_" + questao.getId();
             String[] valoresResposta = request.getParameterValues(nomeParametro);
 
+            System.out.println("--- Processando Questão ID: " + questao.getId() + " (" + questao.getTipo() + ") ---");
+            if (valoresResposta == null) {
+                System.out.println("Valores recebidos: NULL");
+            } else {
+                System.out.print("Valores recebidos: [");
+                for(String v : valoresResposta) System.out.print(v + ", ");
+                System.out.println("]");
+            }
+
             if (valoresResposta == null || valoresResposta.length == 0 || valoresResposta[0].isEmpty()) {
                 continue; // Pula não respondidas
             }

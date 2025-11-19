@@ -15,7 +15,9 @@
 </head>
 <body>
 
-<h1>Gestão de Perfis (RF01)</h1>
+<a href="home">Voltar para página inicial</a>
+
+<h1>Gestão de Perfis</h1>
 
 <h2>Cadastrar Novo Perfil</h2>
 

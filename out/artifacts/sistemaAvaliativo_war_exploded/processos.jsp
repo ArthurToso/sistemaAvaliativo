@@ -19,6 +19,8 @@
 </head>
 <body>
 
+<a href="home">Voltar para página inicial</a>
+
 <h1>Gestão de Processos Avaliativos</h1>
 
 <h2>Cadastrar Novo Processo</h2>
@@ -38,7 +40,7 @@
     </div>
 
     <div>
-        <label for="turmaIds">Turmas (Segure Ctrl/Cmd para selecionar várias):</label>
+        <label for="turmaIds">Turmas (Segure Ctrl para selecionar várias):</label>
         <select id="turmaIds" name="turmaIds" multiple required>
             <c:forEach var="turma" items="${listaTurmas}">
                 <%-- Mostra o código da turma, nome do curso e nome da disciplina --%>

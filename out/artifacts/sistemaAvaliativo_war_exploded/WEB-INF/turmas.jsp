@@ -19,6 +19,8 @@
 </head>
 <body>
 
+<a href="home">Voltar para página inicial</a>
+
 <h1>Gestão de Turmas</h1>
 
 <h2>Cadastrar Nova Turma</h2>
@@ -42,7 +44,7 @@
         </select>
     </div>
     <div>
-        <label for="unidadeCurricularId">Unidade Curricular (Disciplina):</label>
+        <label for="unidadeCurricularId">Disciplina:</label>
         <select id="unidadeCurricularId" name="unidadeCurricularId" required>
             <option value="">Selecione a unidade...</option>
             <c:forEach var="uc" items="${listaUCs}">
@@ -51,7 +53,7 @@
         </select>
     </div>
     <div>
-        <label for="alunoIds">Alunos (Segure Ctrl/Cmd para selecionar vários):</label>
+        <label for="alunoIds">Alunos (Segure Ctrl para selecionar vários):</label>
         <select id="alunoIds" name="alunoIds" multiple required>
             <c:forEach var="aluno" items="${listaAlunos}">
                 <option value="${aluno.id}">${aluno.nome}</option>
@@ -59,7 +61,7 @@
         </select>
     </div>
     <div>
-        <label for="professorIds">Professores (Segure Ctrl/Cmd para selecionar vários):</label>
+        <label for="professorIds">Professores (Segure Ctrl para selecionar vários):</label>
         <select id="professorIds" name="professorIds" multiple required>
             <c:forEach var="prof" items="${listaProfessores}">
                 <option value="${prof.id}">${prof.nome}</option>

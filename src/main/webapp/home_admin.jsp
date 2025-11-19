@@ -33,14 +33,8 @@
     </ul>
 </nav>
 <hr>
-<h3>Relatórios Rápidos (Teste)</h3>
-<%--
-   Isso é temporário. O ideal seria uma tela "Gerar Relatórios" onde
-   você escolhe o Processo e depois vê as Turmas.
-   Mas para testar AGORA, vamos assumir que você sabe os IDs.
+<h3>Relatórios Rápidos</h3>
 
-   Substitua 1 e 1 pelos IDs reais de um Formulário e uma Turma que tenham respostas.
---%>
 <form action="relatorio/turma" method="GET">
     ID do Formulário: <input type="number" name="formularioId" value="1" style="width: 50px">
     ID da Turma: <input type="number" name="turmaId" value="1" style="width: 50px">

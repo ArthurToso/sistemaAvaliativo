@@ -19,6 +19,8 @@
 </head>
 <body>
 
+<a href="home">Voltar para página inicial</a>
+
 <h1>Gestão de Formulários</h1>
 
 <h2>Cadastrar Novo Formulário</h2>
@@ -49,7 +51,7 @@
     </div>
 
     <div>
-        <label for="perfilIds">Destinado aos Perfis (Segure Ctrl/Cmd para selecionar vários):</label>
+        <label for="perfilIds">Destinado aos Perfis (Segure Ctrl para selecionar vários):</label>
         <select id="perfilIds" name="perfilIds" multiple required>
             <c:forEach var="perfil" items="${listaPerfis}">
                 <option value="${perfil.id}">${perfil.nome}</option>

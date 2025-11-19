@@ -69,16 +69,4 @@ public class Resposta {
         this.alternativaSelecionada = alternativaSelecionada;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Resposta resposta = (Resposta) o;
-        return Objects.equals(id, resposta.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

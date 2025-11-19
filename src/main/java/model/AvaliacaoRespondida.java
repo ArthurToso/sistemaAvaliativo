@@ -87,16 +87,4 @@ public class AvaliacaoRespondida {
         this.respostas = respostas;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AvaliacaoRespondida that = (AvaliacaoRespondida) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

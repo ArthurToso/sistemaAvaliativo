@@ -16,6 +16,8 @@
 </head>
 <body>
 
+    <a href="home">Voltar para página inicial</a>
+
     <h1>Gestão de Cursos</h1>
 
     <h2>Cadastrar Novo Curso</h2>

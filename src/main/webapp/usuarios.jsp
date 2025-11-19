@@ -18,6 +18,8 @@
 </head>
 <body>
 
+<a href="home">Voltar para página inicial</a>
+
 <h1>Gestão de Usuários</h1>
 
 <h2>Cadastrar Novo Usuário</h2>

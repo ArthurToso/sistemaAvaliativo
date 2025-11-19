@@ -15,9 +15,11 @@
 </head>
 <body>
 
+<a href="home">Voltar para página inicial</a>
+
 <h1>Gestão de Unidades Curriculares (Disciplinas)</h1>
 
-<h2>Cadastrar Nova Unidade</h2>
+<h2>Cadastrar Nova Disciplina</h2>
 
 <form action="unidades" method="POST">
     <label for="nome">Nome da Unidade:</label>
@@ -27,7 +29,7 @@
 
 <hr>
 
-<h2>Unidades Cadastradas</h2>
+<h2>Disciplinas Cadastradas</h2>
 
 <table>
     <thead>
