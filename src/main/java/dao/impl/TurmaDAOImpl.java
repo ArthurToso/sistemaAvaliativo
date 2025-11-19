@@ -9,6 +9,8 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
 import org.hibernate.Hibernate; // Importante para inicializar as listas
 import java.util.stream.Collectors;
+import model.ProcessoAvaliativo;
+import org.hibernate.Hibernate;
 
 import java.util.List;
 
@@ -110,4 +112,33 @@ public class TurmaDAOImpl implements TurmaDAO {
             em.close();
         }
     }
+
+    @Override
+    public List<Turma> listarPorProfessor(Long professorId) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            // Busca turmas onde a lista de 'professores' contém o ID passado
+            String jpql = "SELECT t FROM Turma t " +
+                    "JOIN t.professores p " +
+                    "WHERE p.id = :professorId";
+
+            TypedQuery<Turma> query = em.createQuery(jpql, Turma.class);
+            query.setParameter("professorId", professorId);
+            List<Turma> turmas = query.getResultList();
+
+            for (Turma t : turmas) {
+                // Carrega a lista de Processos Avaliativos da Turma
+                Hibernate.initialize(t.getProcessosAvaliativos());
+
+                // Para cada Processo, carrega a lista de Formulários
+                for (ProcessoAvaliativo pa : t.getProcessosAvaliativos()) {
+                    Hibernate.initialize(pa.getFormularios());
+                }
+            }
+            return turmas;
+        } finally {
+            em.close();
+        }
+    }
+
 }

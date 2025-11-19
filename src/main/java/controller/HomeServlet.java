@@ -2,10 +2,13 @@ package controller;
 
 import dao.AvaliacaoRespondidaDAO;
 import dao.FormularioDAO;
+import dao.TurmaDAO;
 import dao.impl.AvaliacaoRespondidaDAOImpl;
 import dao.impl.FormularioDAOImpl;
+import dao.impl.TurmaDAOImpl;
 import model.AvaliacaoRespondida;
 import model.Formulario;
+import model.Turma;
 import model.Usuario;
 
 import jakarta.servlet.RequestDispatcher;
@@ -24,11 +27,13 @@ public class HomeServlet extends HttpServlet {
 
     private FormularioDAO formularioDAO;
     private AvaliacaoRespondidaDAO avaliacaoRespondidaDAO;
+    private TurmaDAO turmaDAO;
 
     @Override
     public void init() {
         this.formularioDAO = new FormularioDAOImpl();
         this.avaliacaoRespondidaDAO = new AvaliacaoRespondidaDAOImpl();
+        this.turmaDAO = new TurmaDAOImpl();
     }
 
     @Override
@@ -62,6 +67,13 @@ public class HomeServlet extends HttpServlet {
             RequestDispatcher dispatcher = request.getRequestDispatcher("/home_aluno.jsp");
             dispatcher.forward(request, response);
 
+        } else if ("PROFESSOR".equals(perfil)) {
+            // Busca as turmas desse professor
+            List<Turma> minhasTurmas = turmaDAO.listarPorProfessor(usuarioLogado.getId());
+            request.setAttribute("minhasTurmas", minhasTurmas);
+
+            // Encaminha para o dashboard específico
+            request.getRequestDispatcher("/home_professor.jsp").forward(request, response);
         } else {
             // Se for PROFESSOR, COORDENADOR ou ADMINISTRADOR,
             // encaminha para o dashboard administrativo

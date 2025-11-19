@@ -6,6 +6,7 @@ import model.Formulario;
 import model.Questao;
 import model.Resposta;
 import model.TipoQuestao;
+import org.hibernate.Hibernate;
 import util.JPAUtil;
 
 import jakarta.persistence.EntityManager;
@@ -27,8 +28,11 @@ public class RelatorioDAOImpl implements RelatorioDAO {
             // Mapa auxiliar para organizar as estatísticas por ID da questão
             Map<Long, EstatisticaQuestao> mapaEstatisticas = new HashMap<>();
 
-            // Inicializa o mapa com todas as questões do formulário (mesmo as sem resposta)
+            // Inicializa o mapa E carrega as alternativas
             for (Questao q : formulario.getQuestoes()) {
+                // Esta linha força o Hibernate a ir ao banco buscar as alternativas AGORA
+                Hibernate.initialize(q.getAlternativas());
+
                 mapaEstatisticas.put(q.getId(), new EstatisticaQuestao(q));
             }
 

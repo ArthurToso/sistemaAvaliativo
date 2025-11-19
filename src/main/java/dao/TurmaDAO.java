@@ -10,4 +10,5 @@ public interface TurmaDAO {
     Turma buscarPorId(Long id);
     Turma buscarPorIdComListas(Long id);
     List<Turma> listarTodos();
+    List<Turma> listarPorProfessor(Long professorId);
 }
